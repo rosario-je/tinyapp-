@@ -35,8 +35,7 @@ app.get("/urls", (req, res) => {
 
 app.post("/login", (req, res) => {
   const username = req.body.username
-  res.cookie('username', username, { path: '/login', secure: true })
-  res.cookie = ('username', username)
+  res.cookie('username', username, { path: '/login'})
   res.redirect("/urls")
 })
 

@@ -5,11 +5,11 @@ const PORT = 8080;
 //Set templating engine to EJS
 app.set('view engine', 'ejs');
 
+
 function generateRandomString() {
   const id = Math.random().toString(36).substring(2,8);
   return id;
 }
-
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,6 +40,12 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { id: id, longURL: urlDatabase[id] };
   res.render("urls_show", templateVars);
 });
+
+app.post('/urls/:id/delete', (req, res) => {
+  delete urlDatabase[req.params.id]
+  res.redirect("/urls")
+})
+
 //Update database with newly created short URL
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;

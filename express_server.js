@@ -40,6 +40,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { id: id, longURL: urlDatabase[id] };
   res.render("urls_show", templateVars);
 });
+//Update database with newly created short URL
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const id = generateRandomString();
@@ -47,6 +48,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+//Redirect to link embedded in short URL
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];

@@ -46,6 +46,15 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect("/urls")
 })
 
+// Edit current longURL
+app.post('/urls/:id', (req, res) => {
+  const id = req.params.id
+  const newLongUrl = req.body.longURL;
+  urlDatabase[id] = newLongUrl;
+  res.redirect('/urls')
+})
+
+
 //Update database with newly created short URL
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;

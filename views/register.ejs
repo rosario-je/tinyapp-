@@ -14,8 +14,9 @@
     <main>
       <div class="container">
         <div class="row justify-content-center">
-          <div class="col-md-6"> <!-- Adjust the column size based on your preference -->
+          <div class="col-md-6"> 
             <div class="register-form m-5 px-5"> 
+              <h1>Welcome to Tiny App!</h1>
               <form action="/register" method="POST">
                 <div class="mb-3">
                   <label for="emailAddress" class="form-label">Email address</label>
@@ -23,7 +24,6 @@
                   type="email" 
                   name="email" 
                   class="form-control" 
-                  aria-describedby="emailHelp"
                   >
                   <div id="emailHelp" class="form-text">Enter the email you want to use with Tiny App!</div>
                 </div>
@@ -34,6 +34,7 @@
                   name="password" 
                   class="form-control" 
                   >
+                  <div id="password" class="form-text">Enter the password you want to use with Tiny App!</div>
                 </div>
                 <!-- <div class="mb-3 form-check">
                   <input type="checkbox" class="form-check-input" id="exampleCheck1">

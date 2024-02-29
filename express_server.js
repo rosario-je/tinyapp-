@@ -27,6 +27,9 @@ app.get("/", (req, res) => {
 });
 
 
+app.get("/register", (req, res) => {
+  res.render("register")
+})
 
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {

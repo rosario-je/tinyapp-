@@ -82,8 +82,7 @@ app.post('/urls/:id', (req, res) => {
 
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
-  const username = req.body.username
-  res.clearCookie('username', username)
+  res.clearCookie('username')
   res.redirect('/urls')
 })
 

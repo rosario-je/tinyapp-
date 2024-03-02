@@ -29,6 +29,15 @@ const users = {
   },
 };
 
+const getUserByEmail = (email) => {
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
+    }
+  }
+  return null;
+}
+
 /* -----------------TEMP URL DATABASE-----------------*/
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -46,14 +55,28 @@ app.get("/register", (req, res) => {
 })
 /* -----------------POST request route for register page-----------------*/
 app.post("/register", (req, res) => {
-  const id = "user_" + generateRandomString()
-  const { email, password} = req.body 
-  users[id]= {
+  const id = "user_" + generateRandomString();
+  const { email, password } = req.body;
+
+  // Check for empty email or password
+  if (!email || !password) {
+    return res.status(400).send("Please enter a valid email and password.");
+  }
+
+  // Check if the email is already registered
+  if (getUserByEmail(email)) {
+    return res.status(400).send("This email is already registered.");
+  }
+
+  // Proceed with adding the new user
+  users[id] = {
     id: id,
     email: email,
     password: password,
-  }
-  res.cookie('user_id', id)
+  };
+
+  // Set cookie and redirect
+  res.cookie('user_id', id);
   res.redirect("/urls");
 })
 
@@ -142,8 +165,8 @@ app.post('/urls/:id', (req, res) => {
 
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
-  res.clearCookie('username')
-  res.redirect('/urls')
+  // res.clearCookie('user_id')
+  res.redirect('/register')
 })
 
 /* -----------------Update database with newly created short URL-----------------*/

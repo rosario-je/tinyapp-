@@ -15,7 +15,21 @@ function generateRandomString() {
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-//Mini Database
+/* -----------------TEMP USER DATABASE-----------------*/
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
+/* -----------------TEMP URL DATABASE-----------------*/
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -26,32 +40,65 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-
+/* -----------------GET request route for register page-----------------*/
 app.get("/register", (req, res) => {
   res.render("register")
+})
+/* -----------------POST request route for register page-----------------*/
+app.post("/register", (req, res) => {
+  const id = "user_" + generateRandomString()
+  const { email, password} = req.body 
+  users[id]= {
+    id: id,
+    email: email,
+    password: password,
+  }
+  res.cookie('user_id', id)
+  res.redirect("/urls");
 })
 
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  let email;
+  //Check if user object was found
+  if (user) {
+    email = user.email;
+  } else {
+    email = null; //User does not exist
+  }
+
   const templateVars = { 
     username: req.cookies["username"],
-    urls: urlDatabase 
+    urls: urlDatabase,
+    currentUser: user,
   };
   res.render("urls_index", templateVars);
 });
 
 /* -----------------LOG IN and set cookie username value-----------------*/
 app.post("/login", (req, res) => {
-  const username = req.body.username
-  res.cookie('username', username)
+  //const username = req.body.username
+  res.cookie('user_id', users)
   res.redirect("/urls")
 })
 
 /* -----------------Route for new urls-----------------*/
 app.get("/urls/new", (req, res) => {
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  let email;
+  //Check if user object was found
+  if (user) {
+    email = user.email;
+  } else {
+    email = null; //User does not exist
+  }
   const templateVars = { 
     username: req.cookies["username"],
-    urls: urlDatabase 
+    urls: urlDatabase,
+    currentUser: user,
   };
   res.render("urls_new", templateVars);
 });
@@ -59,11 +106,21 @@ app.get("/urls/new", (req, res) => {
 
 /* -----------------Route for specific url -----------------*/
 app.get("/urls/:id", (req, res) => {
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  let email;
+  //Check if user object was found
+  if (user) {
+    email = user.email;
+  } else {
+    email = null; //User does not exist
+  }
   const id = req.params.id
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id],
-    username: req.cookies["username"]
+    username: req.cookies["username"],
+    currentUser: user,
    };
   res.render("urls_show", templateVars);
 });

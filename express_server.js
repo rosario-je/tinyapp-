@@ -54,13 +54,43 @@ app.get("/", (req, res) => {
 
 /* -----------------GET request route for register page-----------------*/
 app.get("/register", (req, res) => {
-  res.render("register")
+  //Extract user information from cookies
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  let email;
+  //Check if user object was found
+  if (user) {
+    email = user.email;
+  } else {
+    email = null; //User does not exist
+  }
+  const templateVars = { 
+    username: req.cookies["user_id"],
+    urls: urlDatabase,
+    currentUser: user,
+  };
+  res.render("register", templateVars)
 })
 
 
 /* -----------------LOG IN GET request - set cookie username value-----------------*/
 app.get("/login", (req, res) => {
-  res.render("login")
+  //Extract user information from cookies
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  let email;
+  //Check if user object was found
+  if (user) {
+    email = user.email;
+  } else {
+    email = null; //User does not exist
+  }
+  const templateVars = { 
+    username: req.cookies["user_id"],
+    urls: urlDatabase,
+    currentUser: user,
+  };
+  res.render("login", templateVars)
 })
 
 
@@ -130,7 +160,7 @@ app.get("/urls", (req, res) => {
   }
 
   const templateVars = { 
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
     urls: urlDatabase,
     currentUser: user,
   };
@@ -150,7 +180,7 @@ app.get("/urls/new", (req, res) => {
     email = null; //User does not exist
   }
   const templateVars = { 
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
     urls: urlDatabase,
     currentUser: user,
   };
@@ -173,7 +203,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id],
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
     currentUser: user,
   };
   res.render("urls_show", templateVars);
@@ -203,6 +233,8 @@ app.post('/urls/:id', (req, res) => {
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
   //Redirect to the Log In page
+
+  res.clearCookie('user_id');
   res.redirect('/login')
 })
 

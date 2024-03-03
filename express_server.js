@@ -95,7 +95,7 @@ app.post("/login", (req, res) => {
   //const username = req.body.username
   const { email, password } = req.body;
   
-  res.cookie('user_id', users)
+  res.cookie('user_id', users[email])
   res.redirect("/urls")
 })
 

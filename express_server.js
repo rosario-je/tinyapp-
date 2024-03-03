@@ -181,7 +181,7 @@ app.post('/urls/:id', (req, res) => {
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
   // res.clearCookie('user_id')
-  res.redirect('/register')
+  res.redirect('/login')
 })
 
 /* -----------------Update database with newly created short URL-----------------*/

@@ -53,32 +53,54 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   res.render("register")
 })
+
+
+/* -----------------LOG IN GET request - set cookie username value-----------------*/
+app.get("/login", (req, res) => {
+  res.render("login")
+})
+
+
 /* -----------------POST request route for register page-----------------*/
 app.post("/register", (req, res) => {
   const id = "user_" + generateRandomString();
   const { email, password } = req.body;
-
+  
   // Check for empty email or password
   if (!email || !password) {
     return res.status(400).send("Please enter a valid email and password.");
   }
-
+  
   // Check if the email is already registered
   if (getUserByEmail(email)) {
     return res.status(400).send("This email is already registered.");
   }
-
+  
   // Proceed with adding the new user
   users[id] = {
     id: id,
     email: email,
     password: password,
   };
-
+  
   // Set cookie and redirect
   res.cookie('user_id', id);
   res.redirect("/urls");
 })
+
+
+
+/* -----------------LOG IN POST request - set cookie username value-----------------*/
+app.post("/login", (req, res) => {
+  //const username = req.body.username
+  const { email, password } = req.body;
+  
+  res.cookie('user_id', users)
+  res.redirect("/urls")
+})
+
+
+
 
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {
@@ -99,13 +121,6 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
-
-/* -----------------LOG IN and set cookie username value-----------------*/
-app.post("/login", (req, res) => {
-  //const username = req.body.username
-  res.cookie('user_id', users)
-  res.redirect("/urls")
-})
 
 /* -----------------Route for new urls-----------------*/
 app.get("/urls/new", (req, res) => {
@@ -144,7 +159,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[id],
     username: req.cookies["username"],
     currentUser: user,
-   };
+  };
   res.render("urls_show", templateVars);
 });
 

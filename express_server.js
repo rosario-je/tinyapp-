@@ -6,16 +6,18 @@ const PORT = 8080;
 //Set templating engine to EJS
 app.set('view engine', 'ejs');
 
-//ID Generator
+//ID Generator function
 function generateRandomString() {
   const id = Math.random().toString(36).substring(2,8);
   return id;
 }
-
+//Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
+
+//Middleware to parse cookies
 app.use(cookieParser());
 
-/* -----------------TEMP USER DATABASE-----------------*/
+/* -----------------Temporary user database-----------------*/
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -29,6 +31,7 @@ const users = {
   },
 };
 
+//Function to get user by email from the temporary user database
 const getUserByEmail = (email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
@@ -38,7 +41,7 @@ const getUserByEmail = (email) => {
   return null;
 }
 
-/* -----------------TEMP URL DATABASE-----------------*/
+/* -----------------Temporary URL database-----------------*/
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -62,21 +65,24 @@ app.get("/login", (req, res) => {
 
 
 /* -----------------POST request route for register page-----------------*/
+
 app.post("/register", (req, res) => {
+  //Generate a unique user ID
   const id = "user_" + generateRandomString();
+  //Extract email and password from the form
   const { email, password } = req.body;
   
-  // Check for empty email or password
+  // Throw an error if the user fails to provide an email or password
   if (!email || !password) {
     return res.status(400).send("Please enter a valid email and password.");
   }
   
-  // Check if the email is already registered
+  // Check if the email is already registered with function
   if (getUserByEmail(email)) {
     return res.status(400).send("This email is already registered.");
   }
   
-  // Proceed with adding the new user
+  //Add the new user
   users[id] = {
     id: id,
     email: email,
@@ -92,9 +98,10 @@ app.post("/register", (req, res) => {
 
 /* -----------------LOG IN POST request - set cookie username value-----------------*/
 app.post("/login", (req, res) => {
+  //Extract email and password from login page
   const { email, password } = req.body;
 
-  // Check if the user with the given email exists
+  // Check if the user with the given email or password exists
   const user = getUserByEmail(email);
   if (!user || user.password !== password) {
     return res.status(403).send("Invalid email or password");
@@ -111,10 +118,11 @@ app.post("/login", (req, res) => {
 
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {
+  //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
   let email;
-  //Check if user object was found
+  //Check if user object exists
   if (user) {
     email = user.email;
   } else {
@@ -131,6 +139,7 @@ app.get("/urls", (req, res) => {
 
 /* -----------------Route for new urls-----------------*/
 app.get("/urls/new", (req, res) => {
+  //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
   let email;
@@ -173,29 +182,38 @@ app.get("/urls/:id", (req, res) => {
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
+  //Update the longn URL for given ID
   delete urlDatabase[req.params.id]
+  
+  //Redirect to the main URLs page
   res.redirect("/urls")
 })
 
 /* -----------------Edit current longURL-----------------*/
 app.post('/urls/:id', (req, res) => {
+  //Update the long URL for the given ID
   const id = req.params.id
   const newLongUrl = req.body.longURL;
   urlDatabase[id] = newLongUrl;
+
+  //Redirect to main URLs page
   res.redirect('/urls')
 })
 
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
-  // res.clearCookie('user_id')
+  //Redirect to the Log In page
   res.redirect('/login')
 })
 
 /* -----------------Update database with newly created short URL-----------------*/
 app.post("/urls", (req, res) => {
+  //Update the long URL with URL given in form and add it to the database
   const longURL = req.body.longURL;
   const id = generateRandomString();
   urlDatabase[id] = longURL;
+
+  //Redirect to the long URL
   res.redirect(`/urls/${id}`);
 });
 

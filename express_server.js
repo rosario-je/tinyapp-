@@ -92,12 +92,19 @@ app.post("/register", (req, res) => {
 
 /* -----------------LOG IN POST request - set cookie username value-----------------*/
 app.post("/login", (req, res) => {
-  //const username = req.body.username
   const { email, password } = req.body;
-  
-  res.cookie('user_id', users[email].id)
-  res.redirect("/urls")
-})
+
+  // Check if the user with the given email exists
+  const user = getUserByEmail(email);
+  if (!user || user.password !== password) {
+    return res.status(403).send("Invalid email or password");
+  }
+
+  // Set cookie only if the user exists
+  res.cookie('user_id', user.id);
+  res.redirect("/urls");
+});
+
 
 
 

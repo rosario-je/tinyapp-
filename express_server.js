@@ -61,6 +61,7 @@ app.get("/register", (req, res) => {
   //Check if user object was found
   if (user) {
     email = user.email;
+    res.redirect('/urls')
   } else {
     email = null; //User does not exist
   }
@@ -81,7 +82,8 @@ app.get("/login", (req, res) => {
   let email;
   //Check if user object was found
   if (user) {
-    email = user.email;
+    email = user.email; //Makes it possible to show email in header.ejs file
+    res.redirect('/urls')
   } else {
     email = null; //User does not exist
   }
@@ -154,7 +156,7 @@ app.get("/urls", (req, res) => {
   let email;
   //Check if user object exists
   if (user) {
-    email = user.email;
+    email = user.email;//Makes it possible to show email in header.ejs file
   } else {
     email = null; //User does not exist
   }
@@ -175,9 +177,10 @@ app.get("/urls/new", (req, res) => {
   let email;
   //Check if user object was found
   if (user) {
-    email = user.email;
+    email = user.email;//Makes it possible to show email in header.ejs file
   } else {
     email = null; //User does not exist
+    res.redirect('/login')
   }
   const templateVars = { 
     username: req.cookies["user_id"],
@@ -195,7 +198,7 @@ app.get("/urls/:id", (req, res) => {
   let email;
   //Check if user object was found
   if (user) {
-    email = user.email;
+    email = user.email; //Makes it possible to show email in header.ejs file
   } else {
     email = null; //User does not exist
   }
@@ -206,6 +209,10 @@ app.get("/urls/:id", (req, res) => {
     username: req.cookies["user_id"],
     currentUser: user,
   };
+  //Check if the id for the long URL exists
+  if (!templateVars.longURL) {
+    res.status(401).send("<h1>This ID does not exists</h1>")
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -240,13 +247,20 @@ app.post('/logout', (req, res) => {
 
 /* -----------------Update database with newly created short URL-----------------*/
 app.post("/urls", (req, res) => {
-  //Update the long URL with URL given in form and add it to the database
-  const longURL = req.body.longURL;
-  const id = generateRandomString();
-  urlDatabase[id] = longURL;
-
-  //Redirect to the long URL
-  res.redirect(`/urls/${id}`);
+  const currentUserId = req.cookies["user_id"]
+  const user = users[currentUserId];
+  //Check if user object was found
+  if (!user) {
+    res.status(401).send("<h1>You cannot shorten URLs without being logged in</h1>")
+  } else {
+    //Update the long URL with URL given in form and add it to the database
+    const longURL = req.body.longURL;
+    const id = generateRandomString();
+    urlDatabase[id] = longURL;
+  
+    //Redirect to the long URL
+    res.redirect(`/urls/${id}`);
+  }
 });
 
 /* -----------------Redirect to link embedded in short URL-----------------*/

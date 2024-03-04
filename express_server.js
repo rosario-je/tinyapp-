@@ -31,6 +31,17 @@ const users = {
   },
 };
 
+/* -----------------Temporary URL database-----------------*/
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
 //Function to get user by email from the temporary user database
 const getUserByEmail = (email) => {
   for (const userId in users) {
@@ -40,12 +51,6 @@ const getUserByEmail = (email) => {
   }
   return null;
 }
-
-/* -----------------Temporary URL database-----------------*/
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
@@ -205,7 +210,7 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id
   const templateVars = { 
     id: id, 
-    longURL: urlDatabase[id],
+    longURL: urlDatabase[id].longURL,
     username: req.cookies["user_id"],
     currentUser: user,
   };
@@ -231,7 +236,7 @@ app.post('/urls/:id', (req, res) => {
   //Update the long URL for the given ID
   const id = req.params.id
   const newLongUrl = req.body.longURL;
-  urlDatabase[id] = newLongUrl;
+  urlDatabase[id].longURL = newLongUrl;
 
   //Redirect to main URLs page
   res.redirect('/urls')
@@ -256,7 +261,12 @@ app.post("/urls", (req, res) => {
     //Update the long URL with URL given in form and add it to the database
     const longURL = req.body.longURL;
     const id = generateRandomString();
-    urlDatabase[id] = longURL;
+    urlDatabase[id] = {
+      longURL: longURL,
+      userId: req.cookies['user_id']
+    }
+    urlDatabase[id].longURL = longURL;
+    console.log(urlDatabase)
   
     //Redirect to the long URL
     res.redirect(`/urls/${id}`);
@@ -266,7 +276,7 @@ app.post("/urls", (req, res) => {
 /* -----------------Redirect to link embedded in short URL-----------------*/
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 

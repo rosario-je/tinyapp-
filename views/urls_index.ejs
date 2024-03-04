@@ -19,7 +19,9 @@
   <body>
     <%- include('partials/_header'); %>
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
+      <% if (currentUser) { %>
+        <h3>My URLs</h3>
+        <div>
       <table class="table">
         <thead>
           <tr>
@@ -33,7 +35,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <td>
                 <form method="GET" action="/urls/<%= id %>">
                   <button type="submit" class="btn btn-outline-primary">Edit</button>
@@ -48,6 +50,15 @@
           <% } %>
         </tbody>
       </table>
+    </div>
+    <% } else { %>
+      <div class="row">
+        <div class="col text-center py-4">
+          <h2>You must be logged in to see your URLs</h2>
+          <h3>Please Log In or Register</h3>
+        </div>
+      </div>
+      <% } %>
     </main>
     
     <!-- Bootstrap JS -->

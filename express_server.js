@@ -10,7 +10,7 @@ const {
   checkForUser, 
   users, 
   urlDatabase
-} = require('./modules/lib')
+} = require('./helpers')
 
 //Set templating engine to EJS
 app.set('view engine', 'ejs');

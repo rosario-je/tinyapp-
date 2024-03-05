@@ -1,66 +1,25 @@
 const express = require('express');
-const app = express();
 const cookieParser = require('cookie-parser')
 const bcrypt = require("bcryptjs");
+const app = express();
 const PORT = 8080;
+//Functions used by server file
+const { 
+  generateRandomString, 
+  getUserByEmail, 
+  checkForUser, 
+  users, 
+  urlDatabase
+} = require('./modules/lib')
 
 //Set templating engine to EJS
 app.set('view engine', 'ejs');
 
-//ID Generator function
-function generateRandomString() {
-  const id = Math.random().toString(36).substring(2,8);
-  return id;
-}
 //Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
 //Middleware to parse cookies
 app.use(cookieParser());
-
-/* -----------------Temporary user database-----------------*/
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
-
-/* -----------------Temporary URL database-----------------*/
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-//Function to get user by email from the temporary user database
-const getUserByEmail = (email) => {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    }
-  }
-  return null;
-}
-//Function to check if a user exists;
-const checkForUser = (user) => {
-  if (user){
-    email = user.email
-
-  } else {
-    return false;
-  }
-}
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
@@ -72,7 +31,6 @@ app.get("/register", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
-  let email;
 
   //Check if user object was found
    if(checkForUser(user)){
@@ -93,7 +51,7 @@ app.get("/login", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
-  let email;
+
   //Check if user object was found
   if(checkForUser(user)){
     res.redirect('/urls')
@@ -159,17 +117,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-
-
-
-
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
   
-
   //Check if user object exists
   checkForUser(user)
 
@@ -193,13 +146,6 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/login')
   }
 
-
-  // if (user) {
-  //   email = user.email;//Makes it possible to show email in header.ejs file
-  // } else {
-  //   email = null; //User does not exist
-  //   res.redirect('/login')
-  // }
   const templateVars = { 
     username: req.cookies["user_id"],
     urls: urlDatabase,
@@ -211,18 +157,15 @@ app.get("/urls/new", (req, res) => {
 
 /* -----------------GET Request Route for specific url -----------------*/
 app.get("/urls/:id", (req, res) => {
+  //Extract current user ID
   const currentUserId = req.cookies["user_id"]
+  //Select specific user obj matching the current user ID
   const user = users[currentUserId];
   const id = req.params.id
  
-  let email;
   //Check if user object was found
   checkForUser(user)
-  // if (user) {
-  //   email = user.email; //Makes it possible to show email in header.ejs file
-  // } else {
-  //   email = null; //User does not exist
-  // }
+
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id].longURL,
@@ -284,9 +227,9 @@ app.post('/urls/:id', (req, res) => {
 
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
-  //Redirect to the Log In page
-
+  //Clear any cookies when logged out
   res.clearCookie('user_id');
+  //Redirect to the Log In page
   res.redirect('/login')
 })
 
@@ -294,6 +237,7 @@ app.post('/logout', (req, res) => {
 app.post("/urls", (req, res) => {
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
+
   //Check if user object was found
   if (!user) {
     res.status(401).send("<h1>You cannot shorten URLs without being logged in</h1>")
@@ -305,11 +249,11 @@ app.post("/urls", (req, res) => {
       res.redirect("urls/new");
     }
     const id = generateRandomString();
+    //Add Short URL id object
     urlDatabase[id] = {
       longURL: longURL,
       userID: req.cookies['user_id']
     }
-    
     urlDatabase[id].longURL = longURL;
     //Redirect to the long URL
     res.redirect(`/urls/${id}`);

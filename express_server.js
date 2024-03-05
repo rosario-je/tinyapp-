@@ -1,5 +1,5 @@
 const express = require('express');
-const cookieParser = require('cookie-parser')
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
@@ -19,7 +19,13 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 
 //Middleware to parse cookies
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  secret: 'secretCookie',
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
@@ -29,7 +35,7 @@ app.get("/", (req, res) => {
 /* -----------------GET request route for register page-----------------*/
 app.get("/register", (req, res) => {
   //Extract user information from cookies
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const user = users[currentUserId];
 
   //Check if user object was found
@@ -38,7 +44,7 @@ app.get("/register", (req, res) => {
    } 
 
   const templateVars = { 
-    username: req.cookies["user_id"],
+    username: req.session.user_id,
     urls: urlDatabase,
     currentUser: user,
   };
@@ -49,7 +55,7 @@ app.get("/register", (req, res) => {
 /* -----------------LOG IN GET request - set cookie username value-----------------*/
 app.get("/login", (req, res) => {
   //Extract user information from cookies
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const user = users[currentUserId];
 
   //Check if user object was found
@@ -58,7 +64,7 @@ app.get("/login", (req, res) => {
    } 
   
   const templateVars = { 
-    username: req.cookies["user_id"],
+    username: req.session.user_id,
     urls: urlDatabase,
     currentUser: user,
   };
@@ -93,9 +99,9 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword,
   };
-  console.log(users)
+  
   // Set cookie and redirect
-  res.cookie('user_id', id);
+  req.session.user_id = id;
   res.redirect("/urls");
 })
 
@@ -113,21 +119,21 @@ app.post("/login", (req, res) => {
   }
 
   // Set cookie only if the user exists
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
   res.redirect("/urls");
 });
 
 /* -----------------Route for urls main page-----------------*/
 app.get("/urls", (req, res) => {
   //Extract user information from cookies
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const user = users[currentUserId];
   
   //Check if user object exists
   checkForUser(user)
 
   const templateVars = { 
-    username: req.cookies["user_id"],
+    username: req.session.user_id,
     urls: urlDatabase,
     currentUser: user,
   };
@@ -137,7 +143,7 @@ app.get("/urls", (req, res) => {
 /* -----------------Route for new urls-----------------*/
 app.get("/urls/new", (req, res) => {
   //Extract user information from cookies
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const user = users[currentUserId];
   let email;
   //Check if user object was not found
@@ -147,7 +153,7 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = { 
-    username: req.cookies["user_id"],
+    username: req.session.user_id,
     urls: urlDatabase,
     currentUser: user,
   };
@@ -158,7 +164,7 @@ app.get("/urls/new", (req, res) => {
 /* -----------------GET Request Route for specific url -----------------*/
 app.get("/urls/:id", (req, res) => {
   //Extract current user ID
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   //Select specific user obj matching the current user ID
   const user = users[currentUserId];
   const id = req.params.id
@@ -169,7 +175,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id].longURL,
-    username: req.cookies["user_id"],
+    username: req.session.user_id,
     currentUser: user,
   };
   //Check if the id for the long URL exists
@@ -190,7 +196,7 @@ app.get("/urls/:id", (req, res) => {
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
   //Update the longn URL for given ID
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const id = req.params.id
   
   //Check if the URL exists in the database
@@ -228,14 +234,14 @@ app.post('/urls/:id', (req, res) => {
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
 app.post('/logout', (req, res) => {
   //Clear any cookies when logged out
-  res.clearCookie('user_id');
+  req.session = null;
   //Redirect to the Log In page
   res.redirect('/login')
 })
 
 /* -----------------Update database with newly created short URL-----------------*/
 app.post("/urls", (req, res) => {
-  const currentUserId = req.cookies["user_id"]
+  const currentUserId = req.session.user_id
   const user = users[currentUserId];
 
   //Check if user object was found
@@ -252,7 +258,7 @@ app.post("/urls", (req, res) => {
     //Add Short URL id object
     urlDatabase[id] = {
       longURL: longURL,
-      userID: req.cookies['user_id']
+      userID: req.session['user_id']
     }
     urlDatabase[id].longURL = longURL;
     //Redirect to the long URL

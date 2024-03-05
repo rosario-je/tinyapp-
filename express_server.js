@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser')
+const bcrypt = require("bcryptjs");
 const PORT = 8080;
 
 //Set templating engine to EJS
@@ -114,6 +115,9 @@ app.post("/register", (req, res) => {
   const id = "user_" + generateRandomString();
   //Extract email and password from the form
   const { email, password } = req.body;
+
+  //Hashes password entered in form for security
+  const hashedPassword = bcrypt.hashSync(password, 10)
   
   // Throw an error if the user fails to provide an email or password
   if (!email || !password) {
@@ -129,9 +133,9 @@ app.post("/register", (req, res) => {
   users[id] = {
     id: id,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
-  
+  console.log(users)
   // Set cookie and redirect
   res.cookie('user_id', id);
   res.redirect("/urls");
@@ -143,10 +147,10 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   //Extract email and password from login page
   const { email, password } = req.body;
-
-  // Check if the user with the given email or password exists
   const user = getUserByEmail(email);
-  if (!user || user.password !== password) {
+
+  //Check if the user or hashed user password exists
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid email or password");
   }
 

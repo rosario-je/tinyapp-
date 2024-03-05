@@ -202,18 +202,12 @@ app.post('/urls/:id/delete', (req, res) => {
   //Check if the URL exists in the database
   if (!urlDatabase[id].longURL){
     res.status(403).send("<h1>This URL does not exists</h1>")
-    setTimeout(() => {
-      res.redirect('/urls');
-    },2000)
+    
   } 
   //Check if the user is the owner of the URL
   else if (urlDatabase[id].userID !== currentUserId){
     res.status(403).send("<h1>You don't have permission to view this URL</h1>")
-    setTimeout(() => {
-      res.redirect('/urls');
-    },2000)
   }
-  
   delete urlDatabase[req.params.id]
   
   //Redirect to the main URLs page

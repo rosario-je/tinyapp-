@@ -51,6 +51,15 @@ const getUserByEmail = (email) => {
   }
   return null;
 }
+//Function to check if a user exists;
+const checkForUser = (user) => {
+  if (user){
+    email = user.email
+
+  } else {
+    return false;
+  }
+}
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
@@ -63,13 +72,12 @@ app.get("/register", (req, res) => {
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
   let email;
+
   //Check if user object was found
-  if (user) {
-    email = user.email;
+   if(checkForUser(user)){
     res.redirect('/urls')
-  } else {
-    email = null; //User does not exist
-  }
+   } 
+
   const templateVars = { 
     username: req.cookies["user_id"],
     urls: urlDatabase,
@@ -86,12 +94,10 @@ app.get("/login", (req, res) => {
   const user = users[currentUserId];
   let email;
   //Check if user object was found
-  if (user) {
-    email = user.email; //Makes it possible to show email in header.ejs file
+  if(checkForUser(user)){
     res.redirect('/urls')
-  } else {
-    email = null; //User does not exist
-  }
+   } 
+  
   const templateVars = { 
     username: req.cookies["user_id"],
     urls: urlDatabase,
@@ -158,13 +164,10 @@ app.get("/urls", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
-  let email;
+  
+
   //Check if user object exists
-  if (user) {
-    email = user.email;//Makes it possible to show email in header.ejs file
-  } else {
-    email = null; //User does not exist
-  }
+  checkForUser(user)
 
   const templateVars = { 
     username: req.cookies["user_id"],
@@ -180,13 +183,19 @@ app.get("/urls/new", (req, res) => {
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
   let email;
-  //Check if user object was found
-  if (user) {
-    email = user.email;//Makes it possible to show email in header.ejs file
-  } else {
+  //Check if user object was not found
+  if (checkForUser(user) === false){
     email = null; //User does not exist
     res.redirect('/login')
   }
+
+
+  // if (user) {
+  //   email = user.email;//Makes it possible to show email in header.ejs file
+  // } else {
+  //   email = null; //User does not exist
+  //   res.redirect('/login')
+  // }
   const templateVars = { 
     username: req.cookies["user_id"],
     urls: urlDatabase,
@@ -204,11 +213,12 @@ app.get("/urls/:id", (req, res) => {
  
   let email;
   //Check if user object was found
-  if (user) {
-    email = user.email; //Makes it possible to show email in header.ejs file
-  } else {
-    email = null; //User does not exist
-  }
+  checkForUser(user)
+  // if (user) {
+  //   email = user.email; //Makes it possible to show email in header.ejs file
+  // } else {
+  //   email = null; //User does not exist
+  // }
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id].longURL,

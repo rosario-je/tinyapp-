@@ -35,7 +35,7 @@
           <% for (let id in urls) { %>
             <% if (urls[id].userID === currentUser.id){ %>
             <tr>
-              <td><%= id %></td>
+              <td><a href="/u/<%= id %>"><%= id %></a></td>
               <td><%= urls[id].longURL %></td>
               <td>
                 <form method="GET" action="/urls/<%= id %>">

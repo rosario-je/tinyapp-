@@ -32,7 +32,7 @@ function generateRandomString() {
 }
 
 //Function to get user by email from the temporary user database
-const getUserByEmail = (email) => {
+const getUserByEmail = (email, database) => {
   for (const userId in users) {
     if (users[userId].email === email) {
       return users[userId];

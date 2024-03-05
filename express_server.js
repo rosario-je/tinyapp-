@@ -235,7 +235,19 @@ app.post('/urls/:id/delete', (req, res) => {
   //Update the longn URL for given ID
   const currentUserId = req.cookies["user_id"]
   const id = req.params.id
-
+  
+  if (!urlDatabase[id].longURL){
+    res.status(403).send("<h1>This URL does not exists</h1>")
+    setTimeout(() => {
+      res.redirect('/urls');
+    },2000)
+  } 
+  else if (urlDatabase[id].userID !== currentUserId){
+    res.status(403).send("<h1>You don't have permission to view this URL</h1>")
+    setTimeout(() => {
+      res.redirect('/urls');
+    },2000)
+  }
   if (urlDatabase[id].userID !== currentUserId){
     res.status(403).send("<h1>You don't have permission to view this URL</h1>")
   }

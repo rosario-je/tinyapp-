@@ -196,10 +196,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 
-/* -----------------Route for specific url -----------------*/
+/* -----------------GET Request Route for specific url -----------------*/
 app.get("/urls/:id", (req, res) => {
   const currentUserId = req.cookies["user_id"]
   const user = users[currentUserId];
+  const id = req.params.id
+ 
   let email;
   //Check if user object was found
   if (user) {
@@ -207,7 +209,6 @@ app.get("/urls/:id", (req, res) => {
   } else {
     email = null; //User does not exist
   }
-  const id = req.params.id
   const templateVars = { 
     id: id, 
     longURL: urlDatabase[id].longURL,
@@ -217,14 +218,27 @@ app.get("/urls/:id", (req, res) => {
   //Check if the id for the long URL exists
   if (!templateVars.longURL) {
     res.status(401).send("<h1>This ID does not exists</h1>")
+  } else {
+    //Check if the user owns the URL
+    if (urlDatabase[id].userID !== currentUserId){
+      res.status(403).send("<h1>You don't have permission to view this URL</h1>")
+    } else {
+      res.render("urls_show", templateVars);
+    }
   }
-  res.render("urls_show", templateVars);
+  
 });
 
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
   //Update the longn URL for given ID
+  const currentUserId = req.cookies["user_id"]
+  const id = req.params.id
+
+  if (urlDatabase[id].userID !== currentUserId){
+    res.status(403).send("<h1>You don't have permission to view this URL</h1>")
+  }
   delete urlDatabase[req.params.id]
   
   //Redirect to the main URLs page
@@ -260,14 +274,17 @@ app.post("/urls", (req, res) => {
   } else {
     //Update the long URL with URL given in form and add it to the database
     const longURL = req.body.longURL;
+    if (longURL === ''){
+      res.send("<h1>Enter a valid URL</h1>")
+      res.redirect("urls/new");
+    }
     const id = generateRandomString();
     urlDatabase[id] = {
       longURL: longURL,
-      userId: req.cookies['user_id']
+      userID: req.cookies['user_id']
     }
+    
     urlDatabase[id].longURL = longURL;
-    console.log(urlDatabase)
-  
     //Redirect to the long URL
     res.redirect(`/urls/${id}`);
   }

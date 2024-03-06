@@ -4,13 +4,8 @@ const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 //Functions used by server file
-const {
-  generateRandomString,
-  getUserByEmail,
-  checkForUser,
-  users,
-  urlDatabase
-} = require('./helpers')
+const { generateRandomString, getUserByEmail, checkForUser } = require('./helpers')
+const { users, urlDatabase } = require('./dataBase')
 
 //Set templating engine to EJS
 app.set('view engine', 'ejs');

@@ -2,6 +2,7 @@ const express = require('express');
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
+
 const PORT = 8080;
 //Functions used by server file
 const { generateRandomString, getUserByEmail, checkForUser } = require('./helpers')
@@ -11,7 +12,8 @@ const { users, urlDatabase } = require('./dataBase')
 app.set('view engine', 'ejs');
 
 //Middleware to parse URL-encoded bodies
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 //Middleware to parse cookies
 app.use(cookieSession({
@@ -24,7 +26,14 @@ app.use(cookieSession({
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
-  return res.send("Hello!");
+  //Extract user information from cookies(if any)
+  const currentUserId = req.session.user_id
+  const user = users[currentUserId];
+
+  if (checkForUser(user)) {
+    return res.redirect(302,'/urls')
+  }
+  return res.redirect(302,'/login')
 });
 
 /* -----------------GET request route for register page-----------------*/
@@ -144,34 +153,35 @@ app.get("/urls/new", (req, res) => {
 
 /* -----------------GET Request Route for specific url -----------------*/
 app.get("/urls/:id", (req, res) => {
-  //Extract current user ID
+  const id = req.params.id;
+  const urlObj = urlDatabase[id];
   const currentUserId = req.session.user_id
-  //Select specific user obj matching the current user ID
-  const user = users[currentUserId];
-  const id = req.params.id
 
-  // //Check if user object was found
-  // checkForUser(user)
+  const urlId = urlObj.userID
+  console.log(urlObj)
+  console.log(urlId)
+  console.log(currentUserId)
+
+  if (!urlObj) {
+    return res.status(404).send("URL not found");
+  }
 
   const templateVars = {
     id: id,
-    longURL: urlDatabase[id].longURL,
-    userId: req.session.user_id,
-    currentUser: user,
+    longURL: urlObj.longURL,
+    userId: currentUserId,
+    currentUser: users[currentUserId],
+    urlId
   };
-  //Check if the id for the long URL exists
-  if (!templateVars.longURL) {
-    return res.status(401).send("<h1>This ID does not exists</h1>")
-  } else {
-    //Check if the user owns the URL
-    if (urlDatabase[id].userID !== currentUserId) {
-      return res.status(403).send("<h1>You don't have permission to view this URL</h1>")
-    } else {
-      return res.render("urls_show", templateVars);
-    }
-  }
 
+  // if (urlObj.userID !== currentUserId) {
+  //   res.status(403).send("You don't have permission to view this URL");
+  //   return res.render("urls_show", templateVars);
+  // }
+
+  return res.render("urls_show", templateVars);
 });
+
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
@@ -256,3 +266,5 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+module.exports = app;

@@ -37,4 +37,3 @@ describe('The function getUserByEmail:', function() {
     assert.strictEqual(user, null, 'User does not exists');
   });
 });
-

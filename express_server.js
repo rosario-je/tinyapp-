@@ -156,16 +156,11 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
   const currentUserId = req.session.user_id
-
   const urlId = urlObj.userID
-  console.log(urlObj)
-  console.log(urlId)
-  console.log(currentUserId)
 
   if (!urlObj) {
     return res.status(404).send("URL not found");
   }
-
   const templateVars = {
     id: id,
     longURL: urlObj.longURL,
@@ -181,7 +176,6 @@ app.get("/urls/:id", (req, res) => {
 
   return res.render("urls_show", templateVars);
 });
-
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {

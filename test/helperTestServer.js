@@ -4,17 +4,12 @@ const chaiHttp = require('chai-http');
 
 // Set up chai assertion styles
 const expect = chai.expect;
-
-// Import your Express app
-const app = require('../express_server'); // Update the path to your server file
-
-// Use chai-http middleware
 chai.use(chaiHttp);
+const app = require('../express_server');
 const appUrl = 'http://localhost:8080';
-
 const agent = chai.request.agent(appUrl);
 
-// Define your tests
+
 describe('Server Tests', function () {
 
   // Test case for GET /
@@ -39,7 +34,6 @@ describe('Server Tests', function () {
       })
 
   });
-
 
   // Test case for GET /urls/NOTEXISTS
   it('GET /urls/NOTEXISTS should return status code 404 if the URL does not exist', function () {

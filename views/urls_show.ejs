@@ -10,7 +10,6 @@
     />
     <title>URL - TinyApp Example</title>
   </head>
-
   <body>
       <%- include('partials/_header'); %>
     <div class="card text-center">
@@ -22,7 +21,7 @@
         </p>
       </div>
     </div>
-    <!-- Edit a new long URL -->
+    <!-- Check if user owns URL to access edit form -->
     <% if (userId !== urlId) { %>
       <div class="card text-center">
         <div class="card-body">
@@ -49,7 +48,6 @@
         <div class="card-footer text-muted"></div>
       </div>
     <% } %>
-
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

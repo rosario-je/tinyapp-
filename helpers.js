@@ -1,4 +1,4 @@
-const { users, urlDatabase } = require('./dataBase')
+const { users, urlDatabase } = require('./database')
 
 //ID Generator function
 function generateRandomString() {

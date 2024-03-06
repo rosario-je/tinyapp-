@@ -21,7 +21,7 @@ describe('The function getUserByEmail:', function() {
     const user = getUserByEmail("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
 
-    assert(testUsers[expectedUserID].email === user.email, 'User exists');
+    assert.strictEqual(user.email, testUsers[expectedUserID].email, 'User exists');
   });
 
   it(' - Should return a user with a valid password', function() {
@@ -34,7 +34,7 @@ describe('The function getUserByEmail:', function() {
   it(' - Should thrown an error with a message if the user does not exists ', function() {
     const user = getUserByEmail("unexpectedUser@example.com", testUsers)
     //const expectedUserID = "userRandomID";
-    assert(user === null, 'User does not exists');
+    assert.strictEqual(user, null, 'User does not exists');
   });
 });
 

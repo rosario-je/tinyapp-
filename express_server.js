@@ -31,9 +31,9 @@ app.get("/", (req, res) => {
   const user = users[currentUserId];
 
   if (checkForUser(user)) {
-    return res.redirect(302,'/urls')
+    return res.redirect('/urls')
   }
-  return res.redirect(302,'/login')
+  return res.redirect('/login')
 });
 
 /* -----------------GET request route for register page-----------------*/
@@ -141,7 +141,7 @@ app.get("/urls/new", (req, res) => {
   //Check if user object was not found
   if (checkForUser(user) === false) {
     email = null; //User does not exist
-    return res.redirect('/login')
+    return res.status(302).redirect('/login')
   }
   const templateVars = {
     userId: req.session.user_id,
@@ -156,7 +156,7 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
   const currentUserId = req.session.user_id
-  const urlId = urlObj.userID
+  // const urlId = urlObj.userID
 
   if (!urlObj) {
     return res.status(404).send("URL not found");
@@ -166,13 +166,12 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlObj.longURL,
     userId: currentUserId,
     currentUser: users[currentUserId],
-    urlId
+    urlId: urlObj.userID
   };
 
-  // if (urlObj.userID !== currentUserId) {
-  //   res.status(403).send("You don't have permission to view this URL");
-  //   return res.render("urls_show", templateVars);
-  // }
+  if (urlObj.userID !== currentUserId) {
+    return res.status(403).render("urls_show", templateVars);
+  }
 
   return res.render("urls_show", templateVars);
 });

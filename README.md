@@ -2,7 +2,7 @@
 
 ## Overview
 
-This URL shortening app is a simple web application built using Node.js and Express.js. It allows users to shorten long URLs into more manageable and shareable links. The app also provides user authentication features to secure user data and manage access to shortened URLs.
+This URL shortening app is a simple web application built using Node.js and Express.js. It allows users to shorten long URLs into more manageable links. The app also provides user authentication features to secure user data and manage access to shortened URLs.
 
 ## Features
 
@@ -39,11 +39,11 @@ This URL shortening app is a simple web application built using Node.js and Expr
 
 ## File Structure
 
-- `server.js`: Main entry point of the application containing server setup and routes.
+- `express_server.js`: Main entry point of the application containing server setup and routes.
 - `helpers.js`: Utility functions used throughout the application.
 - `database.js`: In-memory database storing user and URL data.
 - `views/`: Directory containing EJS templates for rendering HTML views.
-- `public/`: Directory for static assets such as stylesheets and client-side JavaScript files.
+- `tests/`: Directory for test files using Mocha and Chai.
 
 ## Final Product
 - Screenshot of login page

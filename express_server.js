@@ -152,7 +152,10 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
   const currentUserId = req.session.user_id;
-
+  
+  if (!urlObj) {
+    return res.status(404).send("URL not found");
+  }
   const templateVars = {
     id: id,
     longURL: urlObj.longURL,
@@ -161,9 +164,6 @@ app.get("/urls/:id", (req, res) => {
     urlId: urlObj.userID
   };
 
-  if (!urlObj) {
-    return res.status(404).send("URL not found");
-  }
   if (urlObj.userID !== currentUserId) {
     return res.status(403).render("urls_show", templateVars);
   }

@@ -23,7 +23,7 @@ This URL shortening app is a simple web application built using Node.js and Expr
 
 ## Installation
 
-1. Clone the repository: `git clone <repository-url>`
+1. Clone the repository: `git clone https://github.com/rosario-je/tinyapp-.git url-shortening-app`
 2. Navigate to the project directory: `cd url-shortening-app`
 3. Install dependencies: `npm install`
 4. Start the server: `npm start`

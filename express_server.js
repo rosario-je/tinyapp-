@@ -6,7 +6,7 @@ const app = express();
 const PORT = 8080;
 //Functions used by server file
 const { generateRandomString, getUserByEmail, checkForUser } = require('./helpers')
-const { users, urlDatabase } = require('./dataBase')
+const { users, urlDatabase } = require('./database')
 
 //Set templating engine to EJS
 app.set('view engine', 'ejs');

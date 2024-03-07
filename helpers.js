@@ -1,4 +1,4 @@
-const { users, urlDatabase } = require('./database')
+const { users, urlDatabase } = require('./database');
 
 //ID Generator function
 function generateRandomString() {
@@ -7,7 +7,7 @@ function generateRandomString() {
 }
 
 //Function to get user by email from the temporary user database
-const getUserByEmail = (email, database) => {
+const getUserByEmail = (email, urlDatabase) => {
   for (const userId in users) {
     if (users[userId].email === email) {
       return users[userId];
@@ -19,14 +19,14 @@ const getUserByEmail = (email, database) => {
 //Function to check if a user exists;
 const checkForUser = (user) => {
   if (user) {
-    email = user.email
+    let email = user.email;
     return true;
   }
   return false;
-}
+};
 
 module.exports = {
   generateRandomString,
   getUserByEmail,
   checkForUser,
-}
+};

@@ -49,6 +49,6 @@ This URL shortening app is a simple web application built using Node.js and Expr
 
 !["Screenshot of login page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/login-page.jpg)
 !["Screenshot of register page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/register-page.jpg)
-!["Screenshot of URLs page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/urls-page.jpgg)
+!["Screenshot of URLs page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/urls-page.jpg)
 !["Screenshot of URL edit page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/url-edit-page.jpg)
 !["Screenshot of URL edit user authentication page"](https://github.com/rosario-je/tinyapp-/blob/main/docs/url-auth-edit-page.jpg)

@@ -33,7 +33,6 @@ describe('The function getUserByEmail:', function() {
 
   it(' - Should thrown an error with a message if the user does not exists ', function() {
     const user = getUserByEmail("unexpectedUser@example.com", testUsers);
-    //const expectedUserID = "userRandomID";
     assert.strictEqual(user, null, 'User does not exists');
   });
 });

@@ -19,9 +19,23 @@ const getUserByEmail = (email, urlDatabase) => {
 //Function to check if a user exists;
 const checkForUser = (user) => !!user;
 
+function isLoggedInAndUrlBelongsToUser(req, urlId) {
+  const currentUserId = req.session.user_id;
+  const user = users[currentUserId];
+  const urlObj = urlDatabase[urlId];
+
+  // Check if user is logged in and URL exists
+  if (!user || !urlObj) {
+    return false;
+  }
+
+  // Check if URL belongs to the user
+  return urlObj.userID === currentUserId;
+}
 
 module.exports = {
   generateRandomString,
   getUserByEmail,
   checkForUser,
+  isLoggedInAndUrlBelongsToUser
 };

@@ -152,24 +152,27 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
   const currentUserId = req.session.user_id;
-  
-  if (!urlObj) {
-    return res.status(404).send("URL not found");
-  }
+
   const templateVars = {
     id: id,
-    longURL: urlObj.longURL,
+    
+    // Set longURL to empty string if urlObj doesn't exist
+    longURL: urlObj ? urlObj.longURL : "", 
     userId: currentUserId,
     currentUser: users[currentUserId],
-    urlId: urlObj.userID
+
+    // Set urlId to empty string if urlObj doesn't exist
+    urlId: urlObj ? urlObj.userID : "", 
+    urlExists: !!urlObj, // Add a new variable to indicate URL existence
   };
 
-  if (urlObj.userID !== currentUserId) {
+  if (urlObj && urlObj.userID !== currentUserId) {
     return res.status(403).render("urls_show", templateVars);
   }
 
   return res.render("urls_show", templateVars);
 });
+
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
@@ -240,17 +243,16 @@ app.post("/urls", (req, res) => {
 /* -----------------Redirect to link embedded in short URL-----------------*/
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
+  const urlObj = urlDatabase[id];
+
+  if (!urlObj) {
+    return res.redirect("/urls/" + id);  // Redirect to /urls/:id with the same ID
+  }
+
+  const longURL = urlObj.longURL;
   return res.redirect(longURL);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

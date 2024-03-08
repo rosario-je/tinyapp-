@@ -92,7 +92,7 @@ app.post("/register", (req, res) => {
   const currentUser = users[currentUserId];
 
   if (!email || !password) {
-    return res.status(400).render('partials/_errorHeader.ejs', {message: "Please enter a valid email and password"},currentUser);
+    return res.status(400).render('partials/_errorHeader.ejs', {message: "Please enter a valid email and password",currentUser: false});
   }
   // Check if the email is already registered with function
   if (getUserByEmail(email)) {

@@ -2,10 +2,15 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const app = express();
-
 const PORT = 8080;
 //Functions used by server file
-const { generateRandomString, getUserByEmail, checkForUser } = require('./helpers');
+const { 
+  generateRandomString, 
+  getUserByEmail, 
+  checkForUser,
+  isLoggedInAndUrlBelongsToUser 
+} = require('./helpers');
+
 const { users, urlDatabase } = require('./database');
 
 //Set templating engine to EJS
@@ -23,6 +28,7 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
 
 /* -----------------Route for homepage-----------------*/
 app.get("/", (req, res) => {
@@ -76,18 +82,21 @@ app.get("/login", (req, res) => {
 
 /* -----------------POST request route for register page-----------------*/
 app.post("/register", (req, res) => {
-
-  const id = "user_" + generateRandomString();
+  
   //Extract email and password from the form
   const { email, password } = req.body;
+  const id = "user_" + generateRandomString();
   const hashedPassword = bcrypt.hashSync(password, 10);
 
+  const currentUserId = req.session.user_id;
+  const currentUser = users[currentUserId];
+
   if (!email || !password) {
-    return res.status(400).send("Please enter a valid email and password.");
+    return res.status(400).render('partials/_errorHeader.ejs', {message: "Please enter a valid email and password"},currentUser);
   }
   // Check if the email is already registered with function
   if (getUserByEmail(email)) {
-    return res.status(400).send("This email is already registered.");
+    return res.status(400).render('partials/_errorHeader.ejs', {message: "This email is already registered",currentUser});
   }
   //Add the new user
   users[id] = {
@@ -107,9 +116,12 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(email);
 
+  const currentUserId = req.session.user_id;
+  const currentUser = users[currentUserId];
+
   //Check if the user or hashed user password exists
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    return res.status(403).send("Invalid email or password");
+    return res.status(403).render('partials/_errorHeader.ejs', {message: "Invalid password or email", currentUser});
   }
 
   // Set cookie only if the user exists
@@ -122,6 +134,7 @@ app.get("/urls", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.session.user_id;
   const user = users[currentUserId];
+
   const templateVars = {
     userId: req.session.user_id,
     urls: urlDatabase,
@@ -135,8 +148,9 @@ app.get("/urls/new", (req, res) => {
   //Extract user information from cookies
   const currentUserId = req.session.user_id;
   const user = users[currentUserId];
-  //Check if user object was not found
-  if (checkForUser(user) === false) {
+
+  //Check if user is logged in to create a new URL
+  if (!checkForUser(user)) {
     return res.status(302).redirect('/login');
   }
   const templateVars = {
@@ -151,59 +165,60 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
-  const currentUserId = req.session.user_id;
 
+  const currentUserId = req.session.user_id;
+  const user = users[currentUserId];
+  
+  //Check if the URL exists
+  if (!urlObj) {
+    return res.status(404).render('partials/_errorHeader.ejs', {message: "URL not found", currentUser: user});
+  }
   const templateVars = {
     id: id,
-    
-    // Set longURL to empty string if urlObj doesn't exist
-    longURL: urlObj ? urlObj.longURL : "", 
+    longURL: urlObj.longURL,
     userId: currentUserId,
     currentUser: users[currentUserId],
-
-    // Set urlId to empty string if urlObj doesn't exist
-    urlId: urlObj ? urlObj.userID : "", 
-    urlExists: !!urlObj, // Add a new variable to indicate URL existence
+    urlId: urlObj.userID
   };
 
-  if (urlObj && urlObj.userID !== currentUserId) {
+  /*
+  -Check if the URL owner matches the current user
+  -Used this verification method instead of helper function for required values by EJS Temaplte
+  */
+  if (urlObj.userID !== currentUserId) {
     return res.status(403).render("urls_show", templateVars);
   }
-
   return res.render("urls_show", templateVars);
 });
 
 
 /* -----------------Handle POST request to delete URL from database-----------------*/
 app.post('/urls/:id/delete', (req, res) => {
-  //Update the longn URL for given ID
-  const currentUserId = req.session.user_id;
   const id = req.params.id;
 
-  //Check if the URL exists in the database
-  if (!urlDatabase[id].longURL) {
-    return res.status(403).send("<h1>This URL does not exists</h1>");
+  // Check user and URL
+  if (!isLoggedInAndUrlBelongsToUser(req, id)) {
+    return res.status(403).send("<h1>You don't have permission to delete this URL</h1>");
   }
-  //Check if the user is the owner of the URL
-  if (urlDatabase[id].userID !== currentUserId) {
-    return res.status(403).send("<h1>You don't have permission to view this URL</h1>");
-  }
-  delete urlDatabase[req.params.id];
 
-  //Redirect to the main URLs page
-  return res.redirect("/urls");
+  // Delete URL and redirect
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 /* -----------------Edit current longURL-----------------*/
 app.post('/urls/:id', (req, res) => {
-  //Update the long URL for the given ID
   const id = req.params.id;
   const newLongUrl = req.body.longURL;
-  //Set the long url from the URL obj in database to the new longURL
-  urlDatabase[id].longURL = newLongUrl;
 
-  //Redirect to main URLs page
-  return res.redirect('/urls');
+  // Check user and URL 
+  if (!isLoggedInAndUrlBelongsToUser(req, id)) {
+    return res.status(403).send("<h1>You don't have permission to edit this URL</h1>");
+  }
+
+  // Update longURL and redirect
+  urlDatabase[id].longURL = newLongUrl;
+  res.redirect('/urls');
 });
 
 /* -----------------Logout and clear cookies when LOGOUT is pressed-----------------*/
@@ -220,12 +235,11 @@ app.post("/urls", (req, res) => {
 
   //Check if user object was found
   if (!user) {
-    res.status(401).send("<h1>You cannot shorten URLs without being logged in</h1>");
+    res.status(401).render('partials/_errorHeader.ejs', {message: "You cannot shorten URLs without being logged in", currentUser: user});
   } else {
     //Update the long URL with URL given in form and add it to the database
     const longURL = req.body.longURL;
     if (longURL === '') {
-      res.send("<h1>Enter a valid URL</h1>");
       return res.redirect("urls/new");
     }
     const id = generateRandomString();
@@ -245,17 +259,17 @@ app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const urlObj = urlDatabase[id];
 
+  // Redirect to /urls/:id with the same ID
   if (!urlObj) {
-    return res.redirect("/urls/" + id);  // Redirect to /urls/:id with the same ID
+    return res.redirect("/urls/" + id);  
   }
-
   const longURL = urlObj.longURL;
   return res.redirect(longURL);
 });
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+//Export required by server tests cases
 module.exports = app;

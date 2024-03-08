@@ -8,52 +8,45 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL Show - TinyApp </title>
+    <title>URL - TinyApp Example</title>
   </head>
   <body>
       <%- include('partials/_header'); %>
-      <% if (!urlExists) { %> <div class="card text-center">
-        <div class="card-header"></div>
-        <div class="card-body">
-          <h2 class="card-title">URL Not Found</h2>
-          <p class="card-text">The requested URL with ID: "<%= id %>" does not exist.</p>
-        </div>
+    <div class="card text-center">
+      <div class="card-header"></div>
+      <div class="card-body">
+        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <p class="card-text">
+          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+        </p>
       </div>
-    <% } else { %>  <div class="card text-center">
-        <div class="card-header"></div>
+    </div>
+    <!-- Check if user owns URL to access edit form -->
+    <% if (userId !== urlId) { %>
+      <div class="card text-center">
         <div class="card-body">
-          <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-          <p class="card-text">
-            Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-          </p>
+          <h2>You do not have permission to edit this URL</h2>
         </div>
+        <div class="card-footer text-muted"></div>
       </div>
-      <% if (userId !== urlId) { %>
-        <div class="card text-center">
-          <div class="card-body">
-            <h2>You do not have permission to edit this URL</h2>
-          </div>
-          <div class="card-footer text-muted"></div>
+    <%} else {%>
+      <div class="card text-center">
+        <div class="card-body">
+          <h2>Edit</h2>
+          <form method="POST" action="/urls/<%= id %>">
+            <label for="longURL">New URL:</label>
+            <input
+              class="form"
+              type="text"
+              name="longURL"
+              placeholder="http://"
+              style="width: 300px; margin: 1em"
+            >
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
         </div>
-      <% } else { %>
-        <div class="card text-center">
-          <div class="card-body">
-            <h2>Edit</h2>
-            <form method="POST" action="/urls/<%= id %>">
-              <label for="longURL">New URL:</label>
-              <input
-                class="form"
-                type="text"
-                name="longURL"
-                placeholder="http://"
-                style="width: 300px; margin: 1em"
-              >
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-          </div>
-          <div class="card-footer text-muted"></div>
-        </div>
-      <% } %>
+        <div class="card-footer text-muted"></div>
+      </div>
     <% } %>
     <!-- Bootstrap JS -->
     <script

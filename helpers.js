@@ -17,13 +17,8 @@ const getUserByEmail = (email, urlDatabase) => {
 };
 
 //Function to check if a user exists;
-const checkForUser = (user) => {
-  if (user) {
-    let email = user.email;
-    return true;
-  }
-  return false;
-};
+const checkForUser = (user) => !!user;
+
 
 module.exports = {
   generateRandomString,
